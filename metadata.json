@@ -1,0 +1,6 @@
+{
+  "name": "نظام إدارة المهام والمشاريع (SQLite)",
+  "description": "نظام متكامل لإدارة المهام والمشاريع مع قاعدة بيانات SQLite للتخزين الدائم، تتبع الإنجاز، التحليلات وإدارة الفئات.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
