@@ -7,7 +7,7 @@ let client: Client | null = null;
 export function getDbClient(): Client {
   if (!client) {
     client = createClient({
-      url: "file:sqlite.db",
+      url: process.env.DATABASE_URL ?? "file:sqlite.db",
     });
   }
   return client;
@@ -327,26 +327,25 @@ export async function initDatabase() {
     }
   }
 
-  // Seed users with REAL bcrypt hashes if empty
+  // Seed admin user from environment variables only
   const userCheck = await db.execute("SELECT COUNT(*) as count FROM users");
   const userCount = Number(userCheck.rows[0]?.count || 0);
 
   if (userCount === 0) {
-    const adminHash = await hashPassword("admin123");
-    const saraHash = await hashPassword("sara123");
-    const mohammedHash = await hashPassword("mohammed123");
-    const fatimaHash = await hashPassword("fatima123");
+    const adminEmail = process.env.ADMIN_EMAIL ?? "admin@company.com";
+    const adminPassword = process.env.ADMIN_PASSWORD ?? "ChangeMe@2024!";
+    const adminHash = await hashPassword(adminPassword);
 
     await db.execute({
       sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       args: [
-        "أحمد محمود (المدير العام)",
-        "admin@company.com",
+        "المدير العام",
+        adminEmail,
         adminHash,
         "admin",
         "active",
-        "مدير النظام والتحكم الشامل",
+        "مدير النظام",
         JSON.stringify([
           "manage_users",
           "manage_projects",
@@ -357,51 +356,6 @@ export async function initDatabase() {
           "manage_settings",
         ]),
         "#0f172a",
-      ],
-    });
-
-    await db.execute({
-      sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        "سارة خالد",
-        "sara@company.com",
-        saraHash,
-        "manager",
-        "active",
-        "مديرة إدارة المشاريع البرمجية",
-        JSON.stringify(["manage_projects", "manage_tasks", "view_reports"]),
-        "#3b82f6",
-      ],
-    });
-
-    await db.execute({
-      sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        "محمد علي",
-        "mohammed@company.com",
-        mohammedHash,
-        "member",
-        "active",
-        "مطور واجهات ومصمم UX",
-        JSON.stringify(["manage_tasks"]),
-        "#10b981",
-      ],
-    });
-
-    await db.execute({
-      sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        "فاطمة الزهراء",
-        "fatima@company.com",
-        fatimaHash,
-        "member",
-        "active",
-        "أخصائية تسويق ومحتوى",
-        JSON.stringify(["manage_tasks"]),
-        "#ec4899",
       ],
     });
   }

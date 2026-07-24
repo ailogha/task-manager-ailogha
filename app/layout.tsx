@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -26,7 +27,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

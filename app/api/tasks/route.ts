@@ -20,10 +20,29 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     const projectId = searchParams.get("project_id");
+    const taskId = searchParams.get("id");
     const status = searchParams.get("status");
     const priority = searchParams.get("priority");
     const search = searchParams.get("search");
     const tag = searchParams.get("tag");
+
+    // Single task fetch by id
+    if (taskId) {
+      const sRes = await db.execute({ sql: "SELECT * FROM subtasks WHERE task_id = ?", args: [Number(taskId)] });
+      const row = (await db.execute({ sql: `SELECT t.*, p.name as project_name, p.color as project_color FROM tasks t LEFT JOIN projects p ON t.project_id = p.id WHERE t.id = ?`, args: [Number(taskId)] })).rows[0] as any;
+      if (!row) return NextResponse.json({ success: false, error: "المهمة غير موجودة" }, { status: 404 });
+      const task = {
+        id: Number(row.id), project_id: Number(row.project_id), title: row.title,
+        description: row.description || "", status: row.status || "todo",
+        priority: row.priority || "medium", due_date: row.due_date || null,
+        estimated_hours: Number(row.estimated_hours || 0), actual_hours: Number(row.actual_hours || 0),
+        tags: row.tags || "", assigned_to: row.assigned_to || "",
+        created_at: row.created_at, updated_at: row.updated_at,
+        project_name: row.project_name || "بدون مشروع", project_color: row.project_color || "#3b82f6",
+        subtasks: sRes.rows.map((s: any) => ({ id: Number(s.id), task_id: Number(s.task_id), title: s.title, completed: Number(s.completed || 0) })),
+      };
+      return NextResponse.json({ success: true, task });
+    }
 
     let query = `
       SELECT 
