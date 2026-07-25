@@ -4,19 +4,32 @@ import { verifySession } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await verifySession(req);
-    if (!session) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "غير مصرح لك بالوصول. يرجى تسجيل الدخول أولاً.",
-        },
-        { status: 401 },
-      );
+    const db = getDbClient();
+
+    // Check if the database has any users. If it does, we require a session to prevent unauthorized initialization/resets.
+    try {
+      const userCheck = await db.execute("SELECT COUNT(*) as count FROM users");
+      const userCount = Number(userCheck.rows[0]?.count || 0);
+
+      if (userCount > 0) {
+        // Only verify session if users already exist
+        const session = await verifySession(req);
+        if (!session) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "غير مصرح لك بالوصول. يرجى تسجيل الدخول أولاً.",
+            },
+            { status: 401 },
+          );
+        }
+      }
+    } catch (e) {
+      // If the query fails, it likely means the 'users' table doesn't exist yet,
+      // which means this is a fresh setup. We can proceed with initialization.
     }
 
     await initDatabase();
-    const db = getDbClient();
 
     const projectsRes = await db.execute(
       "SELECT COUNT(*) as count FROM projects",
