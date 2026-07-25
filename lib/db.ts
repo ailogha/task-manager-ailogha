@@ -383,52 +383,14 @@ export async function initDatabase() {
     }
   }
 
-  // Seed first admin from environment variables when the DB has no users.
-  // This runs on every fresh deploy (e.g. empty Coolify persistent volume),
-  // so the admin account is always recreated automatically without /setup.
-  // /setup page remains available as a fallback if env vars are absent.
+  // IMPORTANT: No admin is auto-seeded from env vars.
+  // ALL user data — including the first admin — lives only in SQLite and is
+  // created through the /setup page on first launch, then managed from the
+  // Users panel inside the app. Updates are written back to SQLite.
+  // Env vars are reserved for true service secrets (JWT, external API keys).
   const userCheck = await db.execute("SELECT COUNT(*) as count FROM users");
   const userCount = Number(userCheck.rows[0]?.count || 0);
-
-  if (userCount === 0) {
-    const adminEmail =
-      process.env.ADMIN_EMAIL && process.env.ADMIN_EMAIL.trim()
-        ? process.env.ADMIN_EMAIL.trim()
-        : null;
-    const adminPassword =
-      process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim()
-        ? process.env.ADMIN_PASSWORD.trim()
-        : null;
-
-    if (adminEmail && adminPassword) {
-      const adminHash = await hashPassword(adminPassword);
-      await db.execute({
-        sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-        args: [
-          process.env.ADMIN_NAME && process.env.ADMIN_NAME.trim()
-            ? process.env.ADMIN_NAME.trim()
-            : "المدير العام",
-          adminEmail,
-          adminHash,
-          "admin",
-          "active",
-          "مدير النظام",
-          JSON.stringify([
-            "manage_users",
-            "manage_projects",
-            "manage_tasks",
-            "system_control",
-            "view_reports",
-            "export_db",
-            "manage_settings",
-          ]),
-          "#0f172a",
-        ],
-      });
-    }
-    // If env vars are absent, /setup page handles first admin creation.
-  }
+  void userCount; // intentionally unused — seeding handled by /setup API
 
   // Migrate legacy hashes to bcrypt
   const allUsers = await db.execute("SELECT id, password_hash FROM users");
