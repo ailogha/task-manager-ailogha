@@ -1,14 +1,69 @@
 import { createClient, Client } from "@libsql/client";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 
-// Global singleton client for local SQLite database file
+// Database client — supports both local file and remote Turso/libSQL.
+//
+// URL resolution priority:
+//   1. DATABASE_URL / TURSO_DATABASE_URL that starts with "libsql://" → remote (Turso)
+//   2. DATABASE_URL that starts with "file:" → explicit local file path
+//   3. Otherwise → default local file:
+//        - Production (NEXT_PUBLIC_NODE_ENV=production OR /app/data exists):
+//            /app/data/sqlite.db   ← MUST match the Coolify persistent volume mount
+//        - Development: ./sqlite.db  (repo root)
+//
+// In production, the Coolify persistent volume mounts host path → /app/data.
+// Writing the SQLite file anywhere else (e.g. /app/sqlite.db) is EPHEMERAL
+// and is lost on every redeploy. So we always anchor to /app/data in prod.
 let client: Client | null = null;
+
+function resolveLocalDbPath(): string {
+  // Allow explicit override (e.g. file:/app/data/sqlite.db)
+  const explicit = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL;
+  if (explicit && explicit.startsWith("file:")) {
+    return explicit;
+  }
+
+  // Persistent volume directory used by Coolify/Docker deployments.
+  // /app is Nixpacks' default app dir; /app/data is our mounted volume.
+  const isProd =
+    process.env.NODE_ENV === "production" || fs.existsSync("/app/data");
+
+  if (isProd) {
+    const dir = "/app/data";
+    // Defensive: ensure the directory exists before libsql opens the file.
+    // The volume mount should already provide it, but mkdir -p is cheap.
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch {
+      // ignore — will surface as a clearer open() error from libsql
+    }
+    return `file:${path.join(dir, "sqlite.db")}`;
+  }
+
+  // Local development fallback (relative to repo root / CWD).
+  return "file:sqlite.db";
+}
 
 export function getDbClient(): Client {
   if (!client) {
-    client = createClient({
-      url: process.env.DATABASE_URL ?? "file:sqlite.db",
-    });
+    const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL;
+    const authToken =
+      process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
+
+    if (dbUrl && dbUrl.startsWith("libsql://")) {
+      // Remote Turso/libSQL database (managed production option)
+      client = createClient({
+        url: dbUrl,
+        authToken: authToken || undefined,
+      });
+    } else {
+      // Local SQLite file (dev or self-hosted with persistent volume)
+      client = createClient({
+        url: resolveLocalDbPath(),
+      });
+    }
   }
   return client;
 }
@@ -328,9 +383,52 @@ export async function initDatabase() {
     }
   }
 
-  // If no users exist, skip seeding — /setup page handles first admin creation
+  // Seed first admin from environment variables when the DB has no users.
+  // This runs on every fresh deploy (e.g. empty Coolify persistent volume),
+  // so the admin account is always recreated automatically without /setup.
+  // /setup page remains available as a fallback if env vars are absent.
   const userCheck = await db.execute("SELECT COUNT(*) as count FROM users");
   const userCount = Number(userCheck.rows[0]?.count || 0);
+
+  if (userCount === 0) {
+    const adminEmail =
+      process.env.ADMIN_EMAIL && process.env.ADMIN_EMAIL.trim()
+        ? process.env.ADMIN_EMAIL.trim()
+        : null;
+    const adminPassword =
+      process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim()
+        ? process.env.ADMIN_PASSWORD.trim()
+        : null;
+
+    if (adminEmail && adminPassword) {
+      const adminHash = await hashPassword(adminPassword);
+      await db.execute({
+        sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        args: [
+          process.env.ADMIN_NAME && process.env.ADMIN_NAME.trim()
+            ? process.env.ADMIN_NAME.trim()
+            : "المدير العام",
+          adminEmail,
+          adminHash,
+          "admin",
+          "active",
+          "مدير النظام",
+          JSON.stringify([
+            "manage_users",
+            "manage_projects",
+            "manage_tasks",
+            "system_control",
+            "view_reports",
+            "export_db",
+            "manage_settings",
+          ]),
+          "#0f172a",
+        ],
+      });
+    }
+    // If env vars are absent, /setup page handles first admin creation.
+  }
 
   // Migrate legacy hashes to bcrypt
   const allUsers = await db.execute("SELECT id, password_hash FROM users");

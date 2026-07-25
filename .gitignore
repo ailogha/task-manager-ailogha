@@ -5,3 +5,15 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local SQLite database files — must NOT be committed.
+# Production DB lives in the persistent volume (/app/data) on the server.
+sqlite.db
+sqlite.db-journal
+sqlite.db-wal
+sqlite.db-shm
+*.sqlite
+*.sqlite3
+
+# Misc scratch files
+cdp-shot.png
