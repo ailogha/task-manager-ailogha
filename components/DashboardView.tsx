@@ -64,7 +64,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return (
       <div className="flex items-center justify-center p-12 text-slate-500 gap-2">
         <Activity className="w-5 h-5 animate-spin text-blue-600" />
-        <span>جاري تحميل إحصائيات SQLite...</span>
+        <span>جاري تحميل إحصائيات النظام...</span>
       </div>
     );
   }
@@ -101,16 +101,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Top Banner */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-100 mb-2">
-            <Database className="w-3 h-3 text-blue-600" />
-            نظام SQLite v3.4 المطور
-          </span>
           <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
             نظام إدارة المهام والمشاريع
           </h2>
           <p className="text-slate-500 text-xs md:text-sm mt-1 max-w-xl">
             إدارة المهام والمشاريع بسلاسة واستخراج تقارير الأداء مع التخزين
-            المحلي الدائم.
+            الدائم.
           </p>
         </div>
 
@@ -177,12 +173,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Storage Status */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-tight">
-            حالة التخزين
+            حالة النظام
           </div>
           <div className="text-2xl font-bold text-slate-900">ممتازة</div>
-          <div className="mt-2 text-[10px] text-blue-600 font-bold flex items-center gap-1">
-            <Database className="w-3 h-3" />
-            SQLite متصل
+          <div className="mt-2 text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+            متصل بالخادم
           </div>
         </div>
       </div>

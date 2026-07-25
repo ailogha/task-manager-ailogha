@@ -91,6 +91,7 @@ export interface User {
   name: string;
   email: string;
   password_hash: string;
+  password?: string; // Optional field for updates
   role: "admin" | "manager" | "member" | "viewer";
   status: "active" | "inactive" | "suspended";
   job_title: string;
@@ -327,38 +328,9 @@ export async function initDatabase() {
     }
   }
 
-  // Seed admin user from environment variables only
+  // If no users exist, skip seeding — /setup page handles first admin creation
   const userCheck = await db.execute("SELECT COUNT(*) as count FROM users");
   const userCount = Number(userCheck.rows[0]?.count || 0);
-
-  if (userCount === 0) {
-    const adminEmail = process.env.ADMIN_EMAIL ?? "admin@company.com";
-    const adminPassword = process.env.ADMIN_PASSWORD ?? "ChangeMe@2024!";
-    const adminHash = await hashPassword(adminPassword);
-
-    await db.execute({
-      sql: `INSERT INTO users (name, email, password_hash, role, status, job_title, permissions, avatar_color, last_login)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [
-        "المدير العام",
-        adminEmail,
-        adminHash,
-        "admin",
-        "active",
-        "مدير النظام",
-        JSON.stringify([
-          "manage_users",
-          "manage_projects",
-          "manage_tasks",
-          "system_control",
-          "view_reports",
-          "export_db",
-          "manage_settings",
-        ]),
-        "#0f172a",
-      ],
-    });
-  }
 
   // Migrate legacy hashes to bcrypt
   const allUsers = await db.execute("SELECT id, password_hash FROM users");

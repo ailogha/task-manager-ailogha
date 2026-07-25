@@ -55,7 +55,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/users", label: "الفريق", icon: Users, adminOnly: true },
     { href: "/ai", label: "المساعد الذكي", icon: Sparkles, badge: "AI" },
     { href: "/ai-providers", label: "مزودو AI", icon: Cpu, adminOnly: true },
-    { href: "/sqlite", label: "قاعدة البيانات", icon: Database, adminOnly: true },
     { href: "/settings", label: "الإعدادات", icon: Settings, adminOnly: true },
   ];
 

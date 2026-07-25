@@ -61,8 +61,8 @@ const ALL_PERMISSIONS = [
   },
   {
     id: "export_db",
-    label: "تصدير واسترجاع SQLite",
-    desc: "تحميل واسترجاع نسخة من ملف sqlite.db",
+    label: "تصدير واسترجاع نسخة احتياطية",
+    desc: "تحميل واسترجاع نسخة من البيانات الإجمالية للمنصة",
   },
 ];
 
@@ -166,7 +166,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
       });
       const data = await res.json();
       if (data.success) {
-        alert("تمت إضافة المستخدم بنجاح وتخزينه بملف SQLite");
+        alert("تمت إضافة المستخدم بنجاح وحفظه في النظام");
         setIsAddUserModalOpen(false);
         setFormData({
           name: "",
@@ -183,7 +183,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
         alert(data.error || "حدث خطأ أثناء إضافة المستخدم");
       }
     } catch (err) {
-      alert("فشل الاتصال بخادم SQLite");
+      alert("فشل الاتصال بالخادم");
     }
   };
 
@@ -214,7 +214,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
         alert(data.error || "فشل تحديث كلمة المرور");
       }
     } catch (err) {
-      alert("خطأ أثناء التواصل مع SQLite");
+      alert("خطأ أثناء تحديث البيانات بالخادم");
     }
   };
 
@@ -231,7 +231,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
       });
       const data = await res.json();
       if (data.success) {
-        alert("تم التعديل وحفظ التغييرات بنجاح في SQLite");
+        alert("تم التعديل وحفظ التغييرات بنجاح");
         setIsEditUserModalOpen(false);
         setEditingUser(null);
         fetchUsers();
@@ -248,7 +248,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
   const handleDeleteUser = async (user: User) => {
     if (
       !confirm(
-        `هل أنت تأكد من حذف حساب ${user.name} (${user.email}) نهائياً من قاعدة SQLite؟`,
+        `هل أنت تأكد من حذف حساب ${user.name} (${user.email}) نهائياً؟`,
       )
     )
       return;
@@ -278,13 +278,13 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
     setSystemActionOutput(null);
     try {
       let query = "PRAGMA integrity_check;";
-      let title = "فحص سلامة قاعدة البيانات SQLite";
+      let title = "فحص سلامة قاعدة البيانات";
       if (actionType === "vacuum") {
         query = "VACUUM;";
-        title = "تنظيف وضغط المساحة في ملف sqlite.db (VACUUM)";
+        title = "تنظيف وضغط مساحة البيانات";
       } else if (actionType === "reindex") {
         query = "REINDEX;";
-        title = "إعادة بناء الفهارس وسرعة الاستعلام (REINDEX)";
+        title = "إعادة بناء فهارس البحث وسرعة الاستعلام";
       }
 
       const res = await authFetch("/api/db/query", {
@@ -296,8 +296,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
 
       if (data.success) {
         setSystemActionOutput(
-          `✅ [نجاح]: تم تنفيذ أداة "${title}" بنجاح في SQLite.\n` +
-            `النتيجة: ${JSON.stringify(data.result, null, 2)}`,
+          `✅ [نجاح]: تم تنفيذ أداة "${title}" بنجاح في النظام.`,
         );
       } else {
         setSystemActionOutput(`❌ [خطأ]: ${data.error}`);
@@ -457,14 +456,13 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-right border-collapse text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="px-6 py-3">المستخدم / العضو</th>
-                    <th className="px-6 py-3">المسمى الوظيفي</th>
-                    <th className="px-6 py-3">الدور الحسابي</th>
-                    <th className="px-6 py-3">تشفير كلمة المرور</th>
-                    <th className="px-6 py-3">الحالة</th>
-                    <th className="px-6 py-3 text-center">إجراءات التحكم</th>
-                  </tr>
+              <tr className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th className="px-6 py-3">المستخدم / العضو</th>
+                <th className="px-6 py-3">المسمى الوظيفي</th>
+                <th className="px-6 py-3">الدور الحسابي</th>
+                <th className="px-6 py-3">الحالة</th>
+                <th className="px-6 py-3 text-center">إجراءات التحكم</th>
+              </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
                   {filteredUsers.map((user) => {
@@ -509,25 +507,6 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                         </td>
 
                         <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
-
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">
-                              {user.password_hash.substring(0, 16)}...
-                            </span>
-                            <button
-                              onClick={() => {
-                                setSelectedUserForPassword(user);
-                                setIsPasswordModalOpen(true);
-                              }}
-                              className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 underline"
-                              title="تغيير كلمة المرور"
-                            >
-                              <Key className="w-3 h-3" />
-                              تغيير
-                            </button>
-                          </div>
-                        </td>
 
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -649,12 +628,12 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
       {/* TAB 3: SYSTEM TOOLS & CONTROL PANEL */}
       {activeTab === "system_tools" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* SQLite Maintenance */}
+          {/* Maintenance */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <Database className="w-5 h-5 text-slate-900" />
               <h3 className="font-bold text-slate-900 text-sm">
-                أدوات تحسين وصيانة SQLite الحقيقية
+                أدوات تحسين وصيانة أداء المنصة
               </h3>
             </div>
 
@@ -662,10 +641,10 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-slate-900">
-                    فحص سلامة الجداول (PRAGMA integrity_check)
+                    فحص سلامة جداول البيانات
                   </div>
                   <div className="text-[11px] text-slate-500">
-                    التحقق الفعلي من عدم وجود تلف في الفهارس.
+                    التحقق الفعلي من عدم وجود أي مشاكل بهيكلية البيانات.
                   </div>
                 </div>
                 <button
@@ -680,10 +659,10 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-slate-900">
-                    تنظيف وضغط قاعدة البيانات (VACUUM)
+                    تنظيف وضغط الجداول
                   </div>
                   <div className="text-[11px] text-slate-500">
-                    تقليص حجم sqlite.db واسترجاع المساحة المحذوفة.
+                    ضغط مساحة التخزين واسترجاع المساحات المحذوفة.
                   </div>
                 </div>
                 <button
@@ -691,17 +670,17 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                   disabled={isSystemActionRunning}
                   className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-bold hover:bg-blue-700 transition-colors"
                 >
-                  ضغط الملف
+                  ضغط الجداول
                 </button>
               </div>
 
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-slate-900">
-                    إعادة بناء الفهارس (REINDEX)
+                    إعادة فهرسة البحث
                   </div>
                   <div className="text-[11px] text-slate-500">
-                    تحديث فهارس البحث وتسريع الاستعلامات.
+                    تحديث فهارس البحث وتسريع الاستعلامات وعرض البيانات.
                   </div>
                 </div>
                 <button
@@ -709,7 +688,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                   disabled={isSystemActionRunning}
                   className="px-3 py-1.5 bg-slate-800 text-white rounded-md text-xs font-bold hover:bg-slate-700 transition-colors"
                 >
-                  إعادة التجميع
+                  إعادة المزامنة
                 </button>
               </div>
             </div>
@@ -726,29 +705,20 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <HardDrive className="w-5 h-5 text-slate-900" />
               <h3 className="font-bold text-slate-900 text-sm">
-                بيانات ملف SQLite المحلي والحفظ الدائم
+                حالة نظام التخزين المحلي
               </h3>
             </div>
 
             <div className="space-y-3 text-xs text-slate-700">
               <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-md">
-                <span className="font-semibold">مسار الملف المحلي:</span>
-                <code className="font-mono bg-white px-2 py-0.5 border border-slate-200 rounded font-bold text-slate-900">
-                  sqlite.db
-                </code>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-md">
-                <span className="font-semibold">المحرك والنسخة:</span>
-                <span className="font-bold text-slate-900">
-                  libSQL / SQLite v3.4
-                </span>
+                <span className="font-semibold">نوع التخزين:</span>
+                <span className="font-bold text-slate-900">محلي دائم آمن</span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-md">
                 <span className="font-semibold">تشفير كلمات المرور:</span>
                 <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  PBKDF2-Secured
+                  Bcrypt-Secured
                 </span>
               </div>
 
@@ -756,12 +726,12 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                 <button
                   onClick={() =>
                     alert(
-                      "ملف sqlite.db محفوظ تلقائياً وبشكل دائم في مجلد المشروع الرئيسي.",
+                      "البيانات محفوظة بشكل دائم ومؤمنة في النظام.",
                     )
                   }
                   className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold rounded-md transition-colors text-xs border border-slate-200"
                 >
-                  التحقق من حالة التخزين المحلي
+                  التحقق من التزامن وحالة التخزين
                 </button>
               </div>
             </div>
@@ -775,7 +745,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base">
-                إضافة عضو / مدير جديد في SQLite
+                إضافة عضو / مدير جديد للنظام
               </h3>
               <button
                 onClick={() => setIsAddUserModalOpen(false)}
@@ -881,7 +851,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                   type="submit"
                   className="px-5 py-2 bg-slate-900 text-white rounded-md font-bold hover:bg-slate-800"
                 >
-                  حفظ في SQLite
+                  حفظ البيانات
                 </button>
               </div>
             </form>
@@ -1031,6 +1001,23 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({
                   <option value="member">عضو فريق (Member)</option>
                   <option value="viewer">مراقب (Viewer)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  كلمة المرور الجديدة (اتركها فارغة للإبقاء على الحالية)
+                </label>
+                <input
+                  type="password"
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      password: e.target.value,
+                    })
+                  }
+                  placeholder="أدخل كلمة المرور الجديدة لتغييرها..."
+                  className="w-full p-2 border border-slate-200 rounded-md focus:outline-none"
+                />
               </div>
 
               <div className="pt-3 flex justify-end gap-2">

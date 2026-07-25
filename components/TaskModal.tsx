@@ -359,7 +359,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 ? "جاري الحفظ..."
                 : taskToEdit
                   ? "تحديث المهمة"
-                  : "حفظ المهمة في SQLite"}
+                  : "حفظ المهمة"}
             </button>
           </div>
         </form>

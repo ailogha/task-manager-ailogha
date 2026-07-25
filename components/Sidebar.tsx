@@ -54,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   platformName,
   platformLogo,
 }) => {
+  // Filter out system view items for display
   const navItems = [
     {
       id: "dashboard" as ViewMode,
@@ -81,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "users" as ViewMode,
-      label: "الفريق والصلاحيات",
+      label: "أعضاء الفريق",
       icon: Users,
       badge: "الفريق",
     },
@@ -93,15 +94,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "ai-providers" as ViewMode,
-      label: "مزودو الذكاء الاصطناعي",
+      label: "إعدادات الذكاء الاصطناعي",
       icon: Cpu,
       badge: null,
-    },
-    {
-      id: "sqlite" as ViewMode,
-      label: "قاعدة بيانات SQLite",
-      icon: Database,
-      badge: "SQLite",
     },
     {
       id: "settings" as ViewMode,
@@ -125,7 +120,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               const isActive = currentView === item.id;
               const isRestricted =
                 (item.id === "users" ||
-                  item.id === "sqlite" ||
                   item.id === "settings" ||
                   item.id === "ai-providers") &&
                 currentUser?.role !== "admin" &&
@@ -230,32 +224,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               );
             })}
           </div>
-        </div>
-      </div>
-
-      {/* SQLite Database Card Widget */}
-      <div className="mt-6 pt-4 border-t border-slate-100">
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-slate-800 text-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-blue-700 font-bold flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5" />
-              SQLite v3.4
-            </span>
-            <span className="flex h-2 w-2 rounded-full bg-blue-500"></span>
-          </div>
-          <div className="text-[10px] text-blue-600 font-medium">
-            مساحة التخزين: محلي بملف{" "}
-            <code className="font-mono bg-blue-100/60 px-1 py-0.5 rounded text-blue-800">
-              sqlite.db
-            </code>
-          </div>
-          <button
-            onClick={() => setCurrentView("sqlite")}
-            className="w-full mt-1 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-[11px] font-bold transition-colors flex items-center justify-center gap-1 shadow-xs"
-          >
-            <span>استعراض جداول SQLite</span>
-            <ChevronLeft className="w-3 h-3" />
-          </button>
         </div>
       </div>
     </aside>

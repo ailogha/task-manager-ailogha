@@ -15,6 +15,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
+    // Redirect to setup if no users exist
+    fetch("/api/check-setup")
+      .then((r) => r.json())
+      .then((d) => { if (d.needsSetup) router.replace("/setup"); })
+      .catch(() => {});
   }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,11 +56,11 @@ export default function LoginPage() {
         {/* Header */}
         <div className="p-8 bg-slate-900 text-white text-center space-y-3 relative">
           <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto">
-            <Database className="w-6 h-6 text-white" />
+            <Lock className="w-6 h-6 text-white" />
           </div>
           <div>
             <h2 className="font-bold text-lg">بوابة تسجيل الدخول</h2>
-            <p className="text-xs text-slate-400 mt-1">منصة إدارة المهام والمشاريع</p>
+            <p className="text-xs text-slate-400 mt-1">منصة إدارة المهام والمشاريع المشتركة</p>
           </div>
           <span className="absolute top-4 left-4 w-2 h-2 rounded-full bg-emerald-400" />
         </div>

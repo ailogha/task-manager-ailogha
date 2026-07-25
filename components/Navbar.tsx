@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 lg:px-8 h-16 flex items-center transition-all shrink-0">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full max-w-7xl mx-auto">
-        {/* Right Side: Brand & SQLite Badge */}
+        {/* Right Side: Brand & Logo */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-xs overflow-hidden shrink-0">
@@ -61,26 +61,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div>
               <h1 className="font-bold text-slate-900 text-base leading-tight tracking-tight flex items-center gap-2">
-                {platformName || "مدير المهام"}
+                {platformName || "نظام إدارة المهام"}
               </h1>
               <p className="text-[11px] text-slate-400 font-medium">
-                نظام SQLite المطور
+                لوحة تحكم ذكية
               </p>
             </div>
           </div>
-
-          {/* SQLite Storage Status Pill */}
-          <button
-            onClick={onOpenSqliteModal}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold hover:bg-blue-100 transition-colors cursor-pointer"
-            title="انقر لعرض تفاصيل قاعدة البيانات SQLite"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span>SQLite : sqlite.db</span>
-          </button>
         </div>
 
         {/* Center: Quick Search */}

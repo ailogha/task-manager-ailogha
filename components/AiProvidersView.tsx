@@ -236,10 +236,9 @@ export const AiProvidersView: React.FC = () => {
               <Cpu className="w-6 h-6 text-cyan-300" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">مزودو الذكاء الاصطناعي</h2>
+              <h2 className="text-xl font-bold">مزودو خدمات التحليل والذكاء الاصطناعي</h2>
               <p className="text-xs text-purple-100 mt-1">
-                أضف أي مزود متوافق مع OpenAI (api.example.com/v1) — يتم جلب
-                النماذج تلقائياً وإسنادها لكل ميزة
+                أضف مزود الخدمات السحابية للذكاء الاصطناعي — يتم تحديث النماذج تلقائياً وإسنادها لكل ميزة
               </p>
             </div>
           </div>
@@ -518,35 +517,35 @@ export const AiProvidersView: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  رابط الوصول (Base URL) *
+                  رابط الوصول للخدمة (URL) *
                 </label>
                 <input
                   type="text"
                   value={addUrl}
                   onChange={(e) => setAddUrl(e.target.value)}
-                  placeholder="https://api.ailogha.com/v1"
+                  placeholder="https://api.domain.com/v1"
                   className="w-full px-3 py-2 border border-slate-200 rounded-md bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
                   required
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
-                  رابط API الأساسي بدون /chat/completions — يتم إضافته تلقائياً
+                  رابط الموصل البرمجي الأساسي للخدمة
                 </p>
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  مفتاح API (API Key) *
+                  المفتاح السري المخصص للوصول *
                 </label>
                 <input
                   type="password"
                   value={addKey}
                   onChange={(e) => setAddKey(e.target.value)}
-                  placeholder="sk-..."
+                  placeholder="أدخل الرمز السري للمزود..."
                   className="w-full px-3 py-2 border border-slate-200 rounded-md bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
                   required
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
-                  يتم حفظه مشفّراً — عند الحفظ يتم جلب كل النماذج المتاحة تلقائياً
+                  يتم حفظ الرمز مشفّراً وبأمان تام
                 </p>
               </div>
 

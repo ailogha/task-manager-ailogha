@@ -11,7 +11,6 @@ import {
   Loader2,
   FileText,
   AlertCircle,
-  Database,
   ArrowLeft,
 } from "lucide-react";
 import { Project } from "@/lib/db";
@@ -155,7 +154,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
       onRefreshData();
     } catch (err) {
       console.error(err);
-      alert("فشل حفظ المهام في قاعدة بيانات SQLite");
+      alert("فشل حفظ المهام في النظام");
     }
   };
 
@@ -329,11 +328,11 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
                   disabled={insertedSuccess}
                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
                 >
-                  <Database className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>
                     {insertedSuccess
-                      ? "تم حفظها بقاعدة SQLite بنجاح!"
-                      : "حفظ جميع المهام في SQLite"}
+                      ? "تم حفظها بنجاح!"
+                      : "حفظ جميع المهام"}
                   </span>
                 </button>
               )}
